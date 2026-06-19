@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: overlay-crop-tool
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./out
+    pullRequestPreviewsEnabled: true

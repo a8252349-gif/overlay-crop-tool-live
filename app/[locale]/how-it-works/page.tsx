@@ -1,0 +1,3 @@
+import {notFound} from 'next/navigation';import {ContentPage} from '@/components/ContentPage';import {isLocale,locales} from '@/lib/i18n';import {pageCopy} from '@/lib/page-copy';
+export function generateStaticParams(){return locales.map(locale=>({locale}))}
+export default async function Page({params}:{params:Promise<{locale:string}>}){const{locale}=await params;if(!isLocale(locale))notFound();const p=pageCopy[locale];return <ContentPage locale={locale}><header className="pageHero"><p className="eyebrow">HOW IT WORKS</p><h1>{p.howTitle}</h1><p>{p.howIntro}</p></header><div className="stepGrid">{p.steps.map((s:string[],i:number)=><article key={s[0]}><span>0{i+1}</span><h2>{s[0]}</h2><p>{s[1]}</p></article>)}</div></ContentPage>}

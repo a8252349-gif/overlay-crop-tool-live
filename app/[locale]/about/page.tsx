@@ -1,0 +1,3 @@
+import {notFound} from 'next/navigation';import {ContentPage} from '@/components/ContentPage';import {isLocale,locales} from '@/lib/i18n';import {pageCopy} from '@/lib/page-copy';
+export function generateStaticParams(){return locales.map(locale=>({locale}))}
+export default async function Page({params}:{params:Promise<{locale:string}>}){const{locale}=await params;if(!isLocale(locale))notFound();const p=pageCopy[locale];return <ContentPage locale={locale}><article className="legalPage"><p className="eyebrow">ABOUT</p><h1>{p.aboutTitle}</h1>{p.aboutBody.map((x:string)=><p key={x}>{x}</p>)}</article></ContentPage>}
