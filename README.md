@@ -122,6 +122,9 @@ The Google verification value is only needed when using the HTML meta-tag verifi
 - Mobile/tablet: drag with one finger to move. Pinch with two fingers to zoom around the gesture center; move both fingers together to pan while pinching.
 - Locked layers ignore movement and zoom gestures.
 
-## Relative drag sliders
+## Slider behavior update
 
-Zoom, rotation, and opacity sliders use relative dragging. Pressing any empty part of a slider does not jump the value to that location. The current value stays unchanged until the pointer moves, then changes smoothly by the drag distance.
+- Clicking or pressing an empty part of a slider starts a relative drag from the current value; it does not jump to the pressed position.
+- Zoom thumb position is linearly synchronized with the numeric value from 0.01× to 50×.
+- 25× appears at approximately the center of the track, 40× at 80%, and 50× only at the right endpoint.
+- The zoom drag sensitivity remains deliberately fine-grained for smoother adjustment.

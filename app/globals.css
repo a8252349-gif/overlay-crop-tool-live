@@ -20,8 +20,8 @@
 
 /* Relative drag sliders: pressing anywhere starts from the current value instead of jumping. */
 .relativeSlider{--slider-progress:0%;position:relative;width:100%;height:34px;display:flex;align-items:center;cursor:ew-resize;touch-action:none;user-select:none;outline:none}
-.relativeSliderTrack{position:absolute;left:0;right:0;height:6px;border-radius:999px;background:#d8d8d2;overflow:hidden}
-.relativeSliderFill{display:block;width:var(--slider-progress);height:100%;background:var(--accent)}
+.relativeSliderTrack{position:absolute;left:8px;right:8px;height:6px;border-radius:999px;background:#d8d8d2;overflow:visible}
+.relativeSliderFill{display:block;width:var(--slider-progress);height:100%;border-radius:999px;background:var(--accent)}
 .relativeSliderThumb{position:absolute;left:var(--slider-progress);top:50%;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--accent);box-shadow:0 1px 4px #0003;transform:translate(-50%,-50%);pointer-events:none}
 .relativeSlider:focus-visible{border-radius:8px;box-shadow:0 0 0 3px rgb(255 90 54 / 22%)}
 .relativeSlider:active .relativeSliderThumb{width:18px;height:18px}

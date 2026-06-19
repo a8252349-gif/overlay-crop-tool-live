@@ -46,7 +46,6 @@ type RelativeSliderProps = {
   step: number;
   label: string;
   onChange: (value: number) => void;
-  mode?: "linear" | "zoom";
   dragSpan?: number;
 };
 
@@ -60,22 +59,20 @@ function snap(value: number, min: number, step: number) {
   return Number(snapped.toFixed(decimals));
 }
 
-function RelativeSlider({ value, min, max, step, label, onChange, mode = "linear", dragSpan }: RelativeSliderProps) {
+function RelativeSlider({ value, min, max, step, label, onChange, dragSpan }: RelativeSliderProps) {
   const dragRef = useRef<{ pointerId: number; startX: number; startValue: number; width: number } | null>(null);
   const safeValue = clamp(value, min, max);
-  const ratio = mode === "zoom"
-    ? (Math.log(safeValue) - Math.log(min)) / (Math.log(max) - Math.log(min))
-    : (safeValue - min) / (max - min);
+
+  // The thumb position is always a direct linear representation of the
+  // numeric value. Therefore the maximum value reaches the visual endpoint
+  // only when the number itself reaches max.
+  const ratio = (safeValue - min) / (max - min);
 
   const valueFromDelta = (startValue: number, deltaX: number, width: number) => {
-    let next: number;
-    if (mode === "zoom") {
-      // Relative exponential zoom: a full-track drag changes the current scale by about 3×.
-      next = startValue * Math.exp((deltaX / Math.max(width, 1)) * Math.log(3));
-    } else {
-      const span = dragSpan ?? (max - min) * 0.35;
-      next = startValue + (deltaX / Math.max(width, 1)) * span;
-    }
+    // Empty-track presses remain relative to the current value. dragSpan only
+    // controls sensitivity; it never changes the value-to-thumb mapping.
+    const span = dragSpan ?? (max - min) * 0.35;
+    const next = startValue + (deltaX / Math.max(width, 1)) * span;
     return clamp(snap(next, min, step), min, max);
   };
 
@@ -131,8 +128,10 @@ function RelativeSlider({ value, min, max, step, label, onChange, mode = "linear
     onLostPointerCapture={() => { dragRef.current = null; }}
     onKeyDown={onKeyDown}
   >
-    <span className="relativeSliderTrack"><span className="relativeSliderFill" /></span>
-    <span className="relativeSliderThumb" />
+    <span className="relativeSliderTrack">
+      <span className="relativeSliderFill" />
+      <span className="relativeSliderThumb" />
+    </span>
   </div>;
 }
 
@@ -440,7 +439,7 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
       <aside className="controlPanel">
         <h2>{selected?.name || labels.layers}</h2>
         {selected ? <>
-          <label className="zoomControl">{labels.zoom}<RelativeSlider label={labels.zoom} min={MIN_SCALE} max={MAX_SCALE} step={0.01} mode="zoom" value={selected.scale} onChange={(value) => update(selected.id, { scale: value })} /><span className="zoomNumber"><input type="number" min={MIN_SCALE} max={MAX_SCALE} step="0.01" value={Number(selected.scale.toFixed(2))} aria-label={`${labels.zoom} value`} onChange={(e) => { const value = e.currentTarget.valueAsNumber; if (!Number.isNaN(value)) update(selected.id, { scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)) }); }} onBlur={(e) => { const value = e.currentTarget.valueAsNumber; update(selected.id, { scale: Number.isNaN(value) ? MIN_SCALE : Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)) }); }} /><b>×</b></span></label>
+          <label className="zoomControl">{labels.zoom}<RelativeSlider label={labels.zoom} min={MIN_SCALE} max={MAX_SCALE} step={0.01} dragSpan={10} value={selected.scale} onChange={(value) => update(selected.id, { scale: value })} /><span className="zoomNumber"><input type="number" min={MIN_SCALE} max={MAX_SCALE} step="0.01" value={Number(selected.scale.toFixed(2))} aria-label={`${labels.zoom} value`} onChange={(e) => { const value = e.currentTarget.valueAsNumber; if (!Number.isNaN(value)) update(selected.id, { scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)) }); }} onBlur={(e) => { const value = e.currentTarget.valueAsNumber; update(selected.id, { scale: Number.isNaN(value) ? MIN_SCALE : Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)) }); }} /><b>×</b></span></label>
           <label>{labels.rotation}<RelativeSlider label={labels.rotation} min={-180} max={180} step={0.1} dragSpan={90} value={selected.rotation} onChange={(value) => update(selected.id, { rotation: value })} /><output>{selected.rotation.toFixed(1)}°</output></label>
           <div className="controlButtons"><button onClick={() => update(selected.id, { x: viewSize.w / 2, y: viewSize.h / 2 })}>{labels.center}</button><button onClick={() => resetLayer(selected)}>{labels.reset}</button></div>
           <div className="nudgeGrid"><span /><button onClick={() => update(selected.id, { y: selected.y - 1 })}>↑</button><span /><button onClick={() => update(selected.id, { x: selected.x - 1 })}>←</button><button onClick={() => update(selected.id, { x: viewSize.w / 2, y: viewSize.h / 2 })}>•</button><button onClick={() => update(selected.id, { x: selected.x + 1 })}>→</button><span /><button onClick={() => update(selected.id, { y: selected.y + 1 })}>↓</button><span /></div>
