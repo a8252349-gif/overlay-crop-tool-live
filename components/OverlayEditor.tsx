@@ -28,6 +28,8 @@ const RATIOS: Ratio[] = [
   { label: "2:3", value: 2 / 3 }, { label: "9:16", value: 9 / 16 }, { label: "16:9", value: 16 / 9 },
 ];
 const VIEW_LONG = 820;
+const MIN_SCALE = 0.01;
+const MAX_SCALE = 100;
 function getViewSize(ratio: number) { return ratio >= 1 ? { w: VIEW_LONG, h: Math.round(VIEW_LONG / ratio) } : { w: Math.round(VIEW_LONG * ratio), h: VIEW_LONG }; }
 
 function uid() { return `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
@@ -102,7 +104,7 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
       const image = new Image();
       const url = URL.createObjectURL(file);
       image.onload = () => {
-        const cover = Math.max(viewSize.w / image.naturalWidth, viewSize.h / image.naturalHeight);
+        const cover = Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.max(viewSize.w / image.naturalWidth, viewSize.h / image.naturalHeight)));
         resolve({ id: uid(), name: file.name, image, x: viewSize.w / 2, y: viewSize.h / 2, scale: cover, rotation: 0, opacity: 1, visible: true, locked: false });
       };
       image.onerror = reject;
@@ -118,7 +120,7 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
   const update = (id: string, patch: Partial<Layer>) => setLayers((prev) => prev.map((l) => l.id === id ? { ...l, ...patch } : l));
 
   const resetLayer = (layer: Layer) => {
-    const cover = Math.max(viewSize.w / layer.image.naturalWidth, viewSize.h / layer.image.naturalHeight);
+    const cover = Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.max(viewSize.w / layer.image.naturalWidth, viewSize.h / layer.image.naturalHeight)));
     update(layer.id, { x: viewSize.w / 2, y: viewSize.h / 2, scale: cover, rotation: 0, opacity: 1 });
   };
 
@@ -142,7 +144,7 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
     if (!selected || selected.locked) return;
     event.preventDefault();
     const factor = event.deltaY < 0 ? 1.04 : 0.96;
-    update(selected.id, { scale: Math.max(0.01, selected.scale * factor) });
+    update(selected.id, { scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, selected.scale * factor)) });
   };
 
   const changeRatio = (newRatio: number) => {
@@ -153,7 +155,7 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
       ...layer,
       x: (layer.x / oldSize.w) * nextSize.w,
       y: (layer.y / oldSize.h) * nextSize.h,
-      scale: layer.scale * scaleFactor,
+      scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, layer.scale * scaleFactor)),
     })));
     setRatio(newRatio);
     const w = outputWidth;
@@ -212,7 +214,7 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
       <aside className="controlPanel">
         <h2>{selected?.name || labels.layers}</h2>
         {selected ? <>
-          <label>{labels.zoom}<input type="range" min="0.01" max={Math.max(5, selected.scale * 4)} step="0.001" value={selected.scale} onChange={(e) => update(selected.id, { scale: Number(e.target.value) })} /><output>{selected.scale.toFixed(2)}×</output></label>
+          <label>{labels.zoom}<input type="range" min={MIN_SCALE} max={MAX_SCALE} step="0.01" value={Math.min(MAX_SCALE, Math.max(MIN_SCALE, selected.scale))} onChange={(e) => update(selected.id, { scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number(e.target.value))) })} /><output>{selected.scale.toFixed(2)}×</output></label>
           <label>{labels.rotation}<input type="range" min="-180" max="180" step="0.1" value={selected.rotation} onChange={(e) => update(selected.id, { rotation: Number(e.target.value) })} /><output>{selected.rotation.toFixed(1)}°</output></label>
           <div className="controlButtons"><button onClick={() => update(selected.id, { x: viewSize.w / 2, y: viewSize.h / 2 })}>{labels.center}</button><button onClick={() => resetLayer(selected)}>{labels.reset}</button></div>
           <div className="nudgeGrid"><span /><button onClick={() => update(selected.id, { y: selected.y - 1 })}>↑</button><span /><button onClick={() => update(selected.id, { x: selected.x - 1 })}>←</button><button onClick={() => update(selected.id, { x: viewSize.w / 2, y: viewSize.h / 2 })}>•</button><button onClick={() => update(selected.id, { x: selected.x + 1 })}>→</button><span /><button onClick={() => update(selected.id, { y: selected.y + 1 })}>↓</button><span /></div>
