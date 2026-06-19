@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { getGuide,guidesByLocale } from "@/lib/content";
 import { copy,isLocale,locales, type Locale } from "@/lib/i18n";
 import { pageCopy } from "@/lib/page-copy";
+import { priorityGuideSlugs } from "@/lib/priority-guides";
 import { buildPageMetadata } from "@/lib/seo";
 import { absoluteUrl, CONTENT_UPDATED_AT, localeLanguageTags, SITE_NAME } from "@/lib/site";
 
@@ -24,7 +25,11 @@ export default async function Page({params}:{params:Promise<{locale:string;slug:
   if(!isLocale(locale))notFound();
   const g=getGuide(locale,slug);
   if(!g)notFound();
-  const related=guidesByLocale[locale].filter(item=>item.slug!==slug).slice(0,3);
+  const prioritySet = new Set<string>(priorityGuideSlugs);
+  const related = guidesByLocale[locale]
+    .filter((item) => item.slug !== slug)
+    .sort((a, b) => Number(prioritySet.has(b.slug)) - Number(prioritySet.has(a.slug)))
+    .slice(0, 3);
   const url=absoluteUrl(`/${locale}/guides/${slug}/`);
   const jsonLd={
     "@context":"https://schema.org",

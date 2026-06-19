@@ -122,9 +122,6 @@ The Google verification value is only needed when using the HTML meta-tag verifi
 - Mobile/tablet: drag with one finger to move. Pinch with two fingers to zoom around the gesture center; move both fingers together to pan while pinching.
 - Locked layers ignore movement and zoom gestures.
 
-## Slider behavior update
+## Multilingual priority keyword guides
 
-- Clicking or pressing an empty part of a slider starts a relative drag from the current value; it does not jump to the pressed position.
-- Zoom thumb position is linearly synchronized with the numeric value from 0.01× to 50×.
-- 25× appears at approximately the center of the track, 40× at 80%, and 50× only at the right endpoint.
-- The zoom drag sensitivity remains deliberately fine-grained for smoother adjustment.
+This version includes five additional search-focused guides in English, Korean, Japanese, and Spanish. They are generated from `lib/priority-guides.ts`, displayed first on the home page and guide index, linked to one another, and included automatically in the XML/text sitemaps and RSS/Atom feeds. See `KEYWORD_GUIDES.md` for the exact URLs.

@@ -1,4 +1,5 @@
 import type { Locale } from './i18n';
+import { priorityGuidesByLocale } from './priority-guides';
 
 export type GuideSection = { heading: string; paragraphs: string[]; bullets?: string[] };
 export type Guide = { slug: string; title: string; description: string; intro: string; sections: GuideSection[]; faq: { q: string; a: string }[] };
@@ -211,5 +212,21 @@ localizedSections.es = localizedSections.ko.map((guide, gi) => guide.map((_, si)
 function makeLocalized(locale:'ko'|'ja'|'es'): Guide[]{ return en.map((g,i)=>({ ...g, title:localizedMeta[locale][i][0], description:localizedMeta[locale][i][1], intro:localizedMeta[locale][i][2], sections: localizedSections[locale][i].map(([heading,paragraph])=>({heading,paragraphs:[paragraph]})), faq: g.faq.map((f,j)=> locale==='ko'?({q:j===0?'원본 해상도가 달라도 사용할 수 있나요?':'원본 파일이 변경되나요?',a:j===0?'네. 사진별로 독립 조절한 뒤 동일한 출력 크기로 저장할 수 있습니다.':'아닙니다. 새로운 결과 파일만 생성됩니다.'}):locale==='ja'?({q:j===0?'元画像の解像度が違っても使えますか？':'元ファイルは変更されますか？',a:j===0?'はい。個別に調整し、同じ出力サイズで保存できます。':'いいえ。新しい結果ファイルが作成されます。'}):({q:j===0?'¿Pueden tener resoluciones distintas?':'¿Se modifica el original?',a:j===0?'Sí. Cada capa se ajusta por separado y se exporta con el mismo tamaño.':'No. Se crea un archivo nuevo.'})) })); }
 const ko = makeLocalized('ko'); const ja = makeLocalized('ja'); const es = makeLocalized('es');
 
-export const guidesByLocale: Record<Locale, Guide[]> = { en, ko, ja, es };
-export function getGuide(locale: Locale, slug: string) { return guidesByLocale[locale].find((g) => g.slug === slug); }
+const replacedLegacySlugs = new Set([
+  'crop-multiple-images-same-size',
+  'align-before-after-photos',
+  'overlay-two-images-online',
+]);
+
+const baseGuidesByLocale: Record<Locale, Guide[]> = { en, ko, ja, es };
+
+export const guidesByLocale: Record<Locale, Guide[]> = {
+  en: [...priorityGuidesByLocale.en, ...baseGuidesByLocale.en.filter((guide) => !replacedLegacySlugs.has(guide.slug))],
+  ko: [...priorityGuidesByLocale.ko, ...baseGuidesByLocale.ko.filter((guide) => !replacedLegacySlugs.has(guide.slug))],
+  ja: [...priorityGuidesByLocale.ja, ...baseGuidesByLocale.ja.filter((guide) => !replacedLegacySlugs.has(guide.slug))],
+  es: [...priorityGuidesByLocale.es, ...baseGuidesByLocale.es.filter((guide) => !replacedLegacySlugs.has(guide.slug))],
+};
+
+export function getGuide(locale: Locale, slug: string) {
+  return guidesByLocale[locale].find((guide) => guide.slug === slug);
+}
