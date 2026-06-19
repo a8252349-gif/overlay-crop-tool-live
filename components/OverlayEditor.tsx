@@ -29,7 +29,7 @@ const RATIOS: Ratio[] = [
 ];
 const VIEW_LONG = 820;
 const MIN_SCALE = 0.01;
-const MAX_SCALE = 100;
+const MAX_SCALE = 50;
 function getViewSize(ratio: number) { return ratio >= 1 ? { w: VIEW_LONG, h: Math.round(VIEW_LONG / ratio) } : { w: Math.round(VIEW_LONG * ratio), h: VIEW_LONG }; }
 
 function uid() { return `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
@@ -214,7 +214,7 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
       <aside className="controlPanel">
         <h2>{selected?.name || labels.layers}</h2>
         {selected ? <>
-          <label>{labels.zoom}<input type="range" min={MIN_SCALE} max={MAX_SCALE} step="0.01" value={Math.min(MAX_SCALE, Math.max(MIN_SCALE, selected.scale))} onChange={(e) => update(selected.id, { scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number(e.target.value))) })} /><output>{selected.scale.toFixed(2)}×</output></label>
+          <label className="zoomControl">{labels.zoom}<input type="range" min={MIN_SCALE} max={MAX_SCALE} step="0.01" value={Math.min(MAX_SCALE, Math.max(MIN_SCALE, selected.scale))} onChange={(e) => update(selected.id, { scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number(e.target.value))) })} /><span className="zoomNumber"><input type="number" min={MIN_SCALE} max={MAX_SCALE} step="0.01" value={Number(selected.scale.toFixed(2))} aria-label={`${labels.zoom} value`} onChange={(e) => { const value = e.currentTarget.valueAsNumber; if (!Number.isNaN(value)) update(selected.id, { scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)) }); }} onBlur={(e) => { const value = e.currentTarget.valueAsNumber; update(selected.id, { scale: Number.isNaN(value) ? MIN_SCALE : Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)) }); }} /><b>×</b></span></label>
           <label>{labels.rotation}<input type="range" min="-180" max="180" step="0.1" value={selected.rotation} onChange={(e) => update(selected.id, { rotation: Number(e.target.value) })} /><output>{selected.rotation.toFixed(1)}°</output></label>
           <div className="controlButtons"><button onClick={() => update(selected.id, { x: viewSize.w / 2, y: viewSize.h / 2 })}>{labels.center}</button><button onClick={() => resetLayer(selected)}>{labels.reset}</button></div>
           <div className="nudgeGrid"><span /><button onClick={() => update(selected.id, { y: selected.y - 1 })}>↑</button><span /><button onClick={() => update(selected.id, { x: selected.x - 1 })}>←</button><button onClick={() => update(selected.id, { x: viewSize.w / 2, y: viewSize.h / 2 })}>•</button><button onClick={() => update(selected.id, { x: selected.x + 1 })}>→</button><span /><button onClick={() => update(selected.id, { y: selected.y + 1 })}>↓</button><span /></div>
