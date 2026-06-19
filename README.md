@@ -39,7 +39,7 @@ The static export is generated in `out/`.
 Copy `.env.example` to `.env.local` and set:
 
 ```env
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
+NEXT_PUBLIC_SITE_URL=https://overlaycrop.com
 NEXT_PUBLIC_CONTACT_EMAIL=hello@your-domain.com
 NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-0000000000000000
 NEXT_PUBLIC_ADSENSE_HOME_SLOT=0000000000
@@ -85,3 +85,33 @@ After deployment, verify these public URLs:
 - `/manifest.webmanifest` — web app manifest
 
 Set `NEXT_PUBLIC_SITE_URL` to the final HTTPS domain before building so every canonical, sitemap, and feed URL uses the correct domain.
+
+## Search Console / SEO hardening included
+
+This version includes:
+
+- Explicit UTF-8 XML sitemap at `/sitemap.xml`
+- Plain-text fallback sitemap at `/sitemap.txt`
+- Crawlable `robots.txt` without blocking Next.js CSS or JavaScript assets
+- Absolute canonical and hreflang URLs for English, Korean, Japanese, and Spanish
+- Unique page titles and meta descriptions
+- WebSite, Organization, WebApplication, Article, and Breadcrumb structured data
+- Search-result favicon and Open Graph image
+- Google Search Console verification environment variable support
+- Descriptive internal links and related-guide links
+
+After deployment, open these URLs and confirm they load:
+
+- `https://overlaycrop.com/robots.txt`
+- `https://overlaycrop.com/sitemap.xml`
+- `https://overlaycrop.com/sitemap.txt`
+
+Render environment variables:
+
+```env
+NEXT_PUBLIC_SITE_URL=https://overlaycrop.com
+NEXT_PUBLIC_CONTACT_EMAIL=your-working-email@example.com
+NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=
+```
+
+The Google verification value is only needed when using the HTML meta-tag verification method.

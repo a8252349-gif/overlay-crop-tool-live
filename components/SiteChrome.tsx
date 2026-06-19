@@ -2,19 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { localeNames, type Locale } from "@/lib/i18n";
+import { copy, localeNames, type Locale } from "@/lib/i18n";
+import { pageCopy } from "@/lib/page-copy";
 
-export function SiteHeader({ locale, labels }: { locale: Locale; labels: any }) {
+export function SiteHeader({ locale, labels }: { locale: Locale; labels: (typeof copy)[Locale] }) {
   const pathname = usePathname();
   const suffix = pathname.replace(/^\/(en|ko|ja|es)/, "");
-  return <header className="siteHeader"><Link className="brand" href={`/${locale}/`}>{labels.siteName}</Link><nav>
+  return <header className="siteHeader"><Link className="brand" href={`/${locale}/`}>{labels.siteName}</Link><nav aria-label="Primary navigation">
     <Link href={`/${locale}/editor/`}>{labels.navEditor}</Link><Link href={`/${locale}/how-it-works/`}>{labels.navGuide}</Link><Link href={`/${locale}/guides/`}>{labels.navGuides}</Link><Link href={`/${locale}/about/`}>{labels.navAbout}</Link>
-    <select aria-label="Language" value={locale} onChange={(e)=>{window.location.href=`/${e.target.value}${suffix||"/"}`}}>{Object.entries(localeNames).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select>
+    <select aria-label="Language" value={locale} onChange={(e)=>{const next=e.target.value;window.localStorage.setItem("overlay-crop-locale",next);window.location.href=`/${next}${suffix||"/"}`}}>{Object.entries(localeNames).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select>
   </nav></header>;
 }
 
 export function SiteFooter({ locale }: { locale: Locale }) {
-  return <footer className="siteFooter"><div><b>Overlay Crop</b><p>Private, browser-based image alignment and cropping.</p></div><div className="footerLinks">
-    <Link href={`/${locale}/guides/`}>Guides</Link><Link href={`/${locale}/faq/`}>FAQ</Link><Link href={`/${locale}/about/`}>About</Link><Link href={`/${locale}/contact/`}>Contact</Link><Link href={`/${locale}/privacy/`}>Privacy</Link><Link href={`/${locale}/terms/`}>Terms</Link><Link href={`/${locale}/cookies/`}>Cookies</Link>
-  </div><span>© {new Date().getFullYear()} Overlay Crop</span></footer>;
+  const t=copy[locale];
+  const p=pageCopy[locale];
+  return <footer className="siteFooter"><div><b>{t.siteName}</b><p>{t.privateText}</p></div><nav className="footerLinks" aria-label="Footer navigation">
+    <Link href={`/${locale}/guides/`}>{t.navGuides}</Link><Link href={`/${locale}/faq/`}>{p.faqTitle}</Link><Link href={`/${locale}/about/`}>{t.navAbout}</Link><Link href={`/${locale}/contact/`}>{p.contactTitle}</Link><Link href={`/${locale}/privacy/`}>{p.privacyTitle}</Link><Link href={`/${locale}/terms/`}>{p.termsTitle}</Link><Link href={`/${locale}/cookies/`}>{p.cookiesTitle}</Link>
+  </nav><span>© {new Date().getFullYear()} Overlay Crop</span></footer>;
 }
