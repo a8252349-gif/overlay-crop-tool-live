@@ -44,7 +44,7 @@ export const copy = {
     exportAll: "Download all ZIP",
     noImages: "Add at least one image to begin.",
     selectLayer: "Select a layer, then drag the image to align it.",
-    wheelTip: "Mouse wheel: zoom · Drag: move · Arrow keys: nudge",
+    wheelTip: "Drag: move · Pinch or mouse wheel: zoom · Arrow keys: nudge",
     ad: "Advertisement",
     guideTitle: "How to match before-and-after photos",
     guideBody: "Upload your original and edited photos, lower the top image opacity, then align facial features or fixed background points. Every exported image uses the same crop ratio and pixel dimensions.",
@@ -55,6 +55,7 @@ export const copy = {
     cookieText: "We use optional cookies for analytics and advertising.",
     accept: "Accept optional cookies",
     reject: "Reject optional cookies",
+    cookieSettings: "Privacy and cookie settings",
   },
   ko: {
     siteName: "오버레이 크롭",
@@ -91,7 +92,7 @@ export const copy = {
     exportAll: "전체 ZIP 다운로드",
     noImages: "먼저 사진을 한 장 이상 추가하세요.",
     selectLayer: "사진을 선택한 뒤 화면에서 드래그해 위치를 맞추세요.",
-    wheelTip: "마우스 휠: 확대 · 드래그: 이동 · 방향키: 미세 이동",
+    wheelTip: "한 손가락: 이동 · 두 손가락 또는 마우스 휠: 확대 · 방향키: 미세 이동",
     ad: "광고",
     guideTitle: "보정 전후 사진 구도 맞추는 방법",
     guideBody: "원본과 보정본을 업로드하고 위쪽 사진의 투명도를 낮춘 뒤 눈, 코, 배경의 고정된 지점을 기준으로 맞추세요. 저장되는 모든 사진은 같은 비율과 픽셀 크기를 사용합니다.",
@@ -102,6 +103,7 @@ export const copy = {
     cookieText: "분석과 광고를 위한 선택 쿠키를 사용할 수 있습니다.",
     accept: "선택 쿠키 허용",
     reject: "선택 쿠키 거부",
+    cookieSettings: "개인정보 및 쿠키 설정",
   },
   ja: {
     siteName: "Overlay Crop",
@@ -138,7 +140,7 @@ export const copy = {
     exportAll: "すべてZIPで保存",
     noImages: "最初に画像を追加してください。",
     selectLayer: "レイヤーを選択して画像をドラッグしてください。",
-    wheelTip: "ホイール：拡大 · ドラッグ：移動 · 矢印：微調整",
+    wheelTip: "1本指：移動 · 2本指またはホイール：拡大 · 矢印：微調整",
     ad: "広告",
     guideTitle: "ビフォー・アフター画像を揃える方法",
     guideBody: "元画像と編集画像を読み込み、上の画像の透明度を下げて、顔や背景の固定点を基準に位置を合わせます。すべて同じ比率とピクセルサイズで保存されます。",
@@ -149,6 +151,7 @@ export const copy = {
     cookieText: "解析と広告のために任意のCookieを使用する場合があります。",
     accept: "任意Cookieを許可",
     reject: "任意Cookieを拒否",
+    cookieSettings: "プライバシーとCookie設定",
   },
   es: {
     siteName: "Overlay Crop",
@@ -185,7 +188,7 @@ export const copy = {
     exportAll: "Descargar ZIP",
     noImages: "Añade al menos una imagen para comenzar.",
     selectLayer: "Selecciona una capa y arrastra la imagen para alinearla.",
-    wheelTip: "Rueda: zoom · Arrastrar: mover · Flechas: ajuste fino",
+    wheelTip: "Un dedo: mover · Pellizcar o rueda: zoom · Flechas: ajuste fino",
     ad: "Publicidad",
     guideTitle: "Cómo alinear fotos de antes y después",
     guideBody: "Sube la foto original y la editada, reduce la opacidad de la imagen superior y alinea rasgos faciales o puntos fijos del fondo. Todas se exportan con la misma proporción y dimensiones.",
@@ -196,6 +199,7 @@ export const copy = {
     cookieText: "Podemos usar cookies opcionales para analítica y publicidad.",
     accept: "Aceptar cookies opcionales",
     reject: "Rechazar cookies opcionales",
+    cookieSettings: "Privacidad y configuración de cookies",
   },
 } as const;
 

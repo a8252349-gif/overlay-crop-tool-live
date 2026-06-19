@@ -23,13 +23,23 @@ function getServerSnapshot() {
 }
 
 export function CookieBanner({ text, accept, reject }: { text: string; accept: string; reject: string }) {
+  const googleCmpEnabled = process.env.NEXT_PUBLIC_GOOGLE_CMP_ENABLED === "true";
   const consent = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  if (consent !== "pending") return null;
+
+  if (googleCmpEnabled || consent !== "pending") return null;
 
   const save = (value: "accepted" | "rejected") => {
     window.localStorage.setItem(CONSENT_KEY, value);
     window.dispatchEvent(new Event(CONSENT_EVENT));
   };
 
-  return <div className="cookieBanner"><p>{text}</p><div><button onClick={() => save("accepted")}>{accept}</button><button className="secondary" onClick={() => save("rejected")}>{reject}</button></div></div>;
+  return (
+    <div className="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie preferences">
+      <p>{text}</p>
+      <div>
+        <button onClick={() => save("accepted")}>{accept}</button>
+        <button className="secondary" onClick={() => save("rejected")}>{reject}</button>
+      </div>
+    </div>
+  );
 }

@@ -7,6 +7,7 @@ import { absoluteUrl, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
 const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
+const adsenseScriptEnabled = process.env.NEXT_PUBLIC_ADSENSE_SCRIPT_ENABLED === "true";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -71,7 +72,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <JsonLd data={graph} />
         {children}
-        {adsenseClient && (
+        {adsenseClient && adsenseScriptEnabled && (
           <Script id="adsense" async strategy="afterInteractive" crossOrigin="anonymous" src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`} />
         )}
       </body>

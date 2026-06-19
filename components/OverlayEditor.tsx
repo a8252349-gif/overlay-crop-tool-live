@@ -1,7 +1,7 @@
 "use client";
 
 import JSZip from "jszip";
-import { ChangeEvent, DragEvent, PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, CSSProperties, DragEvent, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Labels = {
   upload: string; drop: string; maxFive: string; layers: string; opacity: string; zoom: string; rotation: string;
@@ -23,6 +23,9 @@ type Layer = {
 };
 
 type Ratio = { label: string; value: number };
+type CanvasPoint = { x: number; y: number };
+type DragState = { id: string; pointerId: number; startX: number; startY: number; layerX: number; layerY: number };
+type PinchState = { id: string; startDistance: number; startMidpoint: CanvasPoint; layerX: number; layerY: number; scale: number };
 const RATIOS: Ratio[] = [
   { label: "1:1", value: 1 }, { label: "4:5", value: 4 / 5 }, { label: "3:4", value: 3 / 4 },
   { label: "2:3", value: 2 / 3 }, { label: "9:16", value: 9 / 16 }, { label: "16:9", value: 16 / 9 },
@@ -35,10 +38,111 @@ function getViewSize(ratio: number) { return ratio >= 1 ? { w: VIEW_LONG, h: Mat
 function uid() { return `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
 function safeName(name: string) { return name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9가-힣ぁ-んァ-ン一-龯_-]+/g, "-") || "image"; }
 
+
+type RelativeSliderProps = {
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  label: string;
+  onChange: (value: number) => void;
+  mode?: "linear" | "zoom";
+  dragSpan?: number;
+};
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function snap(value: number, min: number, step: number) {
+  const decimals = Math.max(0, (String(step).split(".")[1] || "").length);
+  const snapped = min + Math.round((value - min) / step) * step;
+  return Number(snapped.toFixed(decimals));
+}
+
+function RelativeSlider({ value, min, max, step, label, onChange, mode = "linear", dragSpan }: RelativeSliderProps) {
+  const dragRef = useRef<{ pointerId: number; startX: number; startValue: number; width: number } | null>(null);
+  const safeValue = clamp(value, min, max);
+  const ratio = mode === "zoom"
+    ? (Math.log(safeValue) - Math.log(min)) / (Math.log(max) - Math.log(min))
+    : (safeValue - min) / (max - min);
+
+  const valueFromDelta = (startValue: number, deltaX: number, width: number) => {
+    let next: number;
+    if (mode === "zoom") {
+      // Relative exponential zoom: a full-track drag changes the current scale by about 3×.
+      next = startValue * Math.exp((deltaX / Math.max(width, 1)) * Math.log(3));
+    } else {
+      const span = dragSpan ?? (max - min) * 0.35;
+      next = startValue + (deltaX / Math.max(width, 1)) * span;
+    }
+    return clamp(snap(next, min, step), min, max);
+  };
+
+  const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const rect = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.focus();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startValue: safeValue,
+      width: rect.width,
+    };
+  };
+
+  const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.preventDefault();
+    onChange(valueFromDelta(drag.startValue, event.clientX - drag.startX, drag.width));
+  };
+
+  const finishPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragRef.current?.pointerId !== event.pointerId) return;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    dragRef.current = null;
+  };
+
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    const direction = event.key === "ArrowRight" || event.key === "ArrowUp" ? 1
+      : event.key === "ArrowLeft" || event.key === "ArrowDown" ? -1
+      : 0;
+    if (!direction) return;
+    event.preventDefault();
+    const keyboardStep = event.shiftKey ? step * 10 : step;
+    onChange(clamp(snap(safeValue + direction * keyboardStep, min, step), min, max));
+  };
+
+  return <div
+    className="relativeSlider"
+    role="slider"
+    tabIndex={0}
+    aria-label={label}
+    aria-valuemin={min}
+    aria-valuemax={max}
+    aria-valuenow={safeValue}
+    style={{ "--slider-progress": `${clamp(ratio, 0, 1) * 100}%` } as CSSProperties}
+    onPointerDown={onPointerDown}
+    onPointerMove={onPointerMove}
+    onPointerUp={finishPointer}
+    onPointerCancel={finishPointer}
+    onLostPointerCapture={() => { dragRef.current = null; }}
+    onKeyDown={onKeyDown}
+  >
+    <span className="relativeSliderTrack"><span className="relativeSliderFill" /></span>
+    <span className="relativeSliderThumb" />
+  </div>;
+}
+
 export default function OverlayEditor({ labels }: { labels: Labels }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const dragRef = useRef<{ id: string; startX: number; startY: number; layerX: number; layerY: number } | null>(null);
+  const dragRef = useRef<DragState | null>(null);
+  const pinchRef = useRef<PinchState | null>(null);
+  const activePointersRef = useRef<Map<number, CanvasPoint>>(new Map());
+  const layersRef = useRef<Layer[]>([]);
   const [layers, setLayers] = useState<Layer[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [ratio, setRatio] = useState(4 / 5);
@@ -48,6 +152,10 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
 
   const selected = layers.find((l) => l.id === selectedId) ?? null;
   const viewSize = useMemo(() => getViewSize(ratio), [ratio]);
+
+  useEffect(() => {
+    layersRef.current = layers;
+  }, [layers]);
 
   const drawTo = useCallback((ctx: CanvasRenderingContext2D, w: number, h: number, only?: Layer) => {
     ctx.clearRect(0, 0, w, h);
@@ -117,35 +225,153 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
 
   const onFiles = (e: ChangeEvent<HTMLInputElement>) => { if (e.target.files) void addFiles(Array.from(e.target.files)); e.target.value = ""; };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setDragOver(false); void addFiles(Array.from(e.dataTransfer.files)); };
-  const update = (id: string, patch: Partial<Layer>) => setLayers((prev) => prev.map((l) => l.id === id ? { ...l, ...patch } : l));
+  const update = (id: string, patch: Partial<Layer>) => setLayers((prev) => {
+    const next = prev.map((l) => l.id === id ? { ...l, ...patch } : l);
+    layersRef.current = next;
+    return next;
+  });
 
   const resetLayer = (layer: Layer) => {
     const cover = Math.min(MAX_SCALE, Math.max(MIN_SCALE, Math.max(viewSize.w / layer.image.naturalWidth, viewSize.h / layer.image.naturalHeight)));
     update(layer.id, { x: viewSize.w / 2, y: viewSize.h / 2, scale: cover, rotation: 0, opacity: 1 });
   };
 
-  const pointerPosition = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+  const pointerPosition = (event: ReactPointerEvent<HTMLCanvasElement>): CanvasPoint => {
     const rect = event.currentTarget.getBoundingClientRect();
     return { x: (event.clientX - rect.left) * (viewSize.w / rect.width), y: (event.clientY - rect.top) * (viewSize.h / rect.height) };
   };
+  const pointerPair = () => Array.from(activePointersRef.current.entries()).slice(0, 2);
+  const midpoint = (a: CanvasPoint, b: CanvasPoint): CanvasPoint => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+  const distance = (a: CanvasPoint, b: CanvasPoint) => Math.hypot(b.x - a.x, b.y - a.y);
+  const currentLayer = (id: string) => layersRef.current.find((layer) => layer.id === id) ?? null;
+
+  const startPinch = (layer: Layer) => {
+    const pair = pointerPair();
+    if (pair.length < 2) return;
+    const first = pair[0][1];
+    const second = pair[1][1];
+    pinchRef.current = {
+      id: layer.id,
+      startDistance: Math.max(1, distance(first, second)),
+      startMidpoint: midpoint(first, second),
+      layerX: layer.x,
+      layerY: layer.y,
+      scale: layer.scale,
+    };
+    dragRef.current = null;
+  };
+
   const onPointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (!selected || selected.locked) return;
+    const layer = selectedId ? currentLayer(selectedId) : null;
+    if (!layer || layer.locked) return;
+    event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
-    const p = pointerPosition(event);
-    dragRef.current = { id: selected.id, startX: p.x, startY: p.y, layerX: selected.x, layerY: selected.y };
+    const point = pointerPosition(event);
+    activePointersRef.current.set(event.pointerId, point);
+
+    if (activePointersRef.current.size >= 2) {
+      startPinch(layer);
+      return;
+    }
+
+    pinchRef.current = null;
+    dragRef.current = { id: layer.id, pointerId: event.pointerId, startX: point.x, startY: point.y, layerX: layer.x, layerY: layer.y };
   };
   const onPointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (!dragRef.current) return;
-    const p = pointerPosition(event); const d = dragRef.current;
-    update(d.id, { x: d.layerX + p.x - d.startX, y: d.layerY + p.y - d.startY });
-  };
-  const onPointerUp = () => { dragRef.current = null; };
-  const onWheel = (event: React.WheelEvent<HTMLCanvasElement>) => {
-    if (!selected || selected.locked) return;
+    if (!activePointersRef.current.has(event.pointerId)) return;
     event.preventDefault();
-    const factor = event.deltaY < 0 ? 1.04 : 0.96;
-    update(selected.id, { scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, selected.scale * factor)) });
+    const point = pointerPosition(event);
+    activePointersRef.current.set(event.pointerId, point);
+
+    if (activePointersRef.current.size >= 2 && pinchRef.current) {
+      const pair = pointerPair();
+      if (pair.length < 2) return;
+      const first = pair[0][1];
+      const second = pair[1][1];
+      const pinch = pinchRef.current;
+      const nextMidpoint = midpoint(first, second);
+      const scaleRatio = distance(first, second) / pinch.startDistance;
+      const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, pinch.scale * scaleRatio));
+      const appliedRatio = nextScale / pinch.scale;
+
+      update(pinch.id, {
+        scale: nextScale,
+        x: nextMidpoint.x - (pinch.startMidpoint.x - pinch.layerX) * appliedRatio,
+        y: nextMidpoint.y - (pinch.startMidpoint.y - pinch.layerY) * appliedRatio,
+      });
+      return;
+    }
+
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    update(drag.id, { x: drag.layerX + point.x - drag.startX, y: drag.layerY + point.y - drag.startY });
   };
+  const onPointerUp = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    activePointersRef.current.delete(event.pointerId);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+
+    if (activePointersRef.current.size === 1 && selectedId) {
+      const remaining = Array.from(activePointersRef.current.entries())[0];
+      const layer = currentLayer(selectedId);
+      pinchRef.current = null;
+      if (layer && !layer.locked) {
+        dragRef.current = { id: layer.id, pointerId: remaining[0], startX: remaining[1].x, startY: remaining[1].y, layerX: layer.x, layerY: layer.y };
+      }
+      return;
+    }
+
+    if (activePointersRef.current.size === 0) {
+      dragRef.current = null;
+      pinchRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const handleCanvasWheel = (event: WheelEvent) => {
+      // The canvas owns the wheel gesture: never let the page scroll while
+      // the pointer is over the editing area. A non-passive native listener
+      // is used because some mobile/desktop browsers ignore preventDefault
+      // from passive wheel listeners.
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!selectedId) return;
+
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      const anchor = {
+        x: (event.clientX - rect.left) * (viewSize.w / rect.width),
+        y: (event.clientY - rect.top) * (viewSize.h / rect.height),
+      };
+
+      // Trackpads report smaller, more frequent deltas than mouse wheels.
+      // Exponential scaling keeps both devices smooth and predictable.
+      const factor = Math.exp(-event.deltaY * 0.0015);
+
+      setLayers((prev) => {
+        const current = prev.find((layer) => layer.id === selectedId);
+        if (!current || current.locked) return prev;
+
+        const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, current.scale * factor));
+        const appliedRatio = nextScale / current.scale;
+        const next = prev.map((layer) => layer.id === selectedId ? {
+          ...layer,
+          scale: nextScale,
+          x: anchor.x - (anchor.x - layer.x) * appliedRatio,
+          y: anchor.y - (anchor.y - layer.y) * appliedRatio,
+        } : layer);
+        layersRef.current = next;
+        return next;
+      });
+    };
+
+    canvas.addEventListener("wheel", handleCanvasWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", handleCanvasWheel);
+  }, [selectedId, viewSize]);
 
   const changeRatio = (newRatio: number) => {
     const oldSize = viewSize;
@@ -197,7 +423,7 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
           const originalIndex = layers.length - 1 - reverseIndex;
           return <article key={layer.id} className={`layerCard ${selectedId === layer.id ? "active" : ""}`} onClick={() => setSelectedId(layer.id)}>
             <div className="layerTitle"><span className="layerNumber">{originalIndex + 1}</span><strong title={layer.name}>{layer.name}</strong><button title={labels.remove} onClick={(e) => { e.stopPropagation(); setLayers((prev) => prev.filter((l) => l.id !== layer.id)); if (selectedId === layer.id) setSelectedId(null); }}>×</button></div>
-            <label>{labels.opacity}<input type="range" min="0" max="1" step="0.01" value={layer.opacity} onChange={(e) => update(layer.id, { opacity: Number(e.target.value) })} /><output>{Math.round(layer.opacity * 100)}%</output></label>
+            <label>{labels.opacity}<RelativeSlider label={labels.opacity} min={0} max={1} step={0.01} dragSpan={0.5} value={layer.opacity} onChange={(value) => update(layer.id, { opacity: value })} /><output>{Math.round(layer.opacity * 100)}%</output></label>
             <div className="layerActions"><button className={layer.visible ? "on" : ""} onClick={() => update(layer.id, { visible: !layer.visible })}>{labels.visible}</button><button className={layer.locked ? "on" : ""} onClick={() => update(layer.id, { locked: !layer.locked })}>{labels.lock}</button></div>
           </article>;
         })}</div>
@@ -206,7 +432,7 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
       <main className="workspace">
         <div className={`canvasStage ${dragOver ? "dragOver" : ""}`} onDragOver={(e) => { e.preventDefault(); setDragOver(true); }} onDragLeave={() => setDragOver(false)} onDrop={onDrop}>
           {!layers.length && <button className="dropPrompt" onClick={() => fileRef.current?.click()}><b>{labels.drop}</b><span>{labels.maxFive}</span></button>}
-          <canvas ref={canvasRef} style={{ aspectRatio: String(ratio) }} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onWheel={onWheel} />
+          <canvas ref={canvasRef} style={{ aspectRatio: String(ratio) }} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onLostPointerCapture={onPointerUp} />
         </div>
         <p className="workspaceTip">{layers.length ? labels.wheelTip : labels.selectLayer}</p>
       </main>
@@ -214,8 +440,8 @@ export default function OverlayEditor({ labels }: { labels: Labels }) {
       <aside className="controlPanel">
         <h2>{selected?.name || labels.layers}</h2>
         {selected ? <>
-          <label className="zoomControl">{labels.zoom}<input type="range" min={MIN_SCALE} max={MAX_SCALE} step="0.01" value={Math.min(MAX_SCALE, Math.max(MIN_SCALE, selected.scale))} onChange={(e) => update(selected.id, { scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, Number(e.target.value))) })} /><span className="zoomNumber"><input type="number" min={MIN_SCALE} max={MAX_SCALE} step="0.01" value={Number(selected.scale.toFixed(2))} aria-label={`${labels.zoom} value`} onChange={(e) => { const value = e.currentTarget.valueAsNumber; if (!Number.isNaN(value)) update(selected.id, { scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)) }); }} onBlur={(e) => { const value = e.currentTarget.valueAsNumber; update(selected.id, { scale: Number.isNaN(value) ? MIN_SCALE : Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)) }); }} /><b>×</b></span></label>
-          <label>{labels.rotation}<input type="range" min="-180" max="180" step="0.1" value={selected.rotation} onChange={(e) => update(selected.id, { rotation: Number(e.target.value) })} /><output>{selected.rotation.toFixed(1)}°</output></label>
+          <label className="zoomControl">{labels.zoom}<RelativeSlider label={labels.zoom} min={MIN_SCALE} max={MAX_SCALE} step={0.01} mode="zoom" value={selected.scale} onChange={(value) => update(selected.id, { scale: value })} /><span className="zoomNumber"><input type="number" min={MIN_SCALE} max={MAX_SCALE} step="0.01" value={Number(selected.scale.toFixed(2))} aria-label={`${labels.zoom} value`} onChange={(e) => { const value = e.currentTarget.valueAsNumber; if (!Number.isNaN(value)) update(selected.id, { scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)) }); }} onBlur={(e) => { const value = e.currentTarget.valueAsNumber; update(selected.id, { scale: Number.isNaN(value) ? MIN_SCALE : Math.min(MAX_SCALE, Math.max(MIN_SCALE, value)) }); }} /><b>×</b></span></label>
+          <label>{labels.rotation}<RelativeSlider label={labels.rotation} min={-180} max={180} step={0.1} dragSpan={90} value={selected.rotation} onChange={(value) => update(selected.id, { rotation: value })} /><output>{selected.rotation.toFixed(1)}°</output></label>
           <div className="controlButtons"><button onClick={() => update(selected.id, { x: viewSize.w / 2, y: viewSize.h / 2 })}>{labels.center}</button><button onClick={() => resetLayer(selected)}>{labels.reset}</button></div>
           <div className="nudgeGrid"><span /><button onClick={() => update(selected.id, { y: selected.y - 1 })}>↑</button><span /><button onClick={() => update(selected.id, { x: selected.x - 1 })}>←</button><button onClick={() => update(selected.id, { x: viewSize.w / 2, y: viewSize.h / 2 })}>•</button><button onClick={() => update(selected.id, { x: selected.x + 1 })}>→</button><span /><button onClick={() => update(selected.id, { y: selected.y + 1 })}>↓</button><span /></div>
         </> : <p className="emptySmall">{labels.selectLayer}</p>}

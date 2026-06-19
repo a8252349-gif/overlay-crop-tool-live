@@ -115,3 +115,13 @@ NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=
 ```
 
 The Google verification value is only needed when using the HTML meta-tag verification method.
+
+## Editor gestures
+
+- Desktop: drag to move the selected image. Use the mouse wheel or trackpad over the canvas to zoom around the pointer position. The page will not scroll while the pointer is over the canvas.
+- Mobile/tablet: drag with one finger to move. Pinch with two fingers to zoom around the gesture center; move both fingers together to pan while pinching.
+- Locked layers ignore movement and zoom gestures.
+
+## Relative drag sliders
+
+Zoom, rotation, and opacity sliders use relative dragging. Pressing any empty part of a slider does not jump the value to that location. The current value stays unchanged until the pointer moves, then changes smoothly by the drag distance.

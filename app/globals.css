@@ -8,3 +8,21 @@
 
 /* Search-friendly navigation helpers */
 .breadcrumbs{max-width:1120px;margin:0 auto 24px;font-size:.88rem;color:#666}.breadcrumbs ol{display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;margin:0}.breadcrumbs li:not(:last-child)::after{content:"/";margin-left:8px;color:#aaa}.breadcrumbs a{text-decoration:none;color:inherit}.breadcrumbs a:hover{text-decoration:underline}.articleDate{font-size:.9rem;color:#707070;margin-top:-8px}.relatedGuides{margin-top:56px;padding-top:32px;border-top:1px solid #ddd}.relatedGuides ul{list-style:none;padding:0;display:grid;gap:18px}.relatedGuides li{padding:18px;border:1px solid #ddd;border-radius:12px}.relatedGuides li a{font-weight:700}.relatedGuides li p{margin:8px 0 0;color:#555}.languageLanding nav{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.footerPrivacyButton{border:0;background:none;padding:0;color:inherit;font:inherit;cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}.footerPrivacyButton:hover{color:var(--accent)}
+
+/* Mobile canvas gestures: keep pinch/drag inside the editor instead of scrolling or browser zooming. */
+.canvasStage{overscroll-behavior:contain}
+.canvasStage canvas{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;overscroll-behavior:contain}
+@media(max-width:760px){.canvasStage canvas{touch-action:none}.workspaceTip{line-height:1.45;text-align:center}}
+
+/* Keep wheel and trackpad gestures inside the editor instead of scrolling the page. */
+.canvasStage,.canvasStage canvas{overscroll-behavior:none}
+
+/* Relative drag sliders: pressing anywhere starts from the current value instead of jumping. */
+.relativeSlider{--slider-progress:0%;position:relative;width:100%;height:34px;display:flex;align-items:center;cursor:ew-resize;touch-action:none;user-select:none;outline:none}
+.relativeSliderTrack{position:absolute;left:0;right:0;height:6px;border-radius:999px;background:#d8d8d2;overflow:hidden}
+.relativeSliderFill{display:block;width:var(--slider-progress);height:100%;background:var(--accent)}
+.relativeSliderThumb{position:absolute;left:var(--slider-progress);top:50%;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid var(--accent);box-shadow:0 1px 4px #0003;transform:translate(-50%,-50%);pointer-events:none}
+.relativeSlider:focus-visible{border-radius:8px;box-shadow:0 0 0 3px rgb(255 90 54 / 22%)}
+.relativeSlider:active .relativeSliderThumb{width:18px;height:18px}
+@media(max-width:760px){.relativeSlider{height:44px}.relativeSliderThumb{width:20px;height:20px}.relativeSlider:active .relativeSliderThumb{width:22px;height:22px}}
