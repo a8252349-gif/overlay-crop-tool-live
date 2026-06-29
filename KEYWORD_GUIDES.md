@@ -1,31 +1,40 @@
-# Priority keyword guides
+# Guide library
 
-This build adds five SEO-focused guides in English, Korean, Japanese, and Spanish.
-Each guide is statically generated with its own metadata, canonical URL, hreflang links, Article structured data, RSS/Atom entry, and sitemap entry.
+The guide library is generated from `lib/content.ts` in English, Korean, Japanese, and Spanish. There are 15 distinct topics per locale and 60 localized guide pages in total.
 
-## New guide slugs
+## Current guide slugs
 
+- `image-crop-online`
 - `crop-multiple-images-to-the-same-size`
 - `align-before-and-after-photos`
-- `before-and-after-photo-alignment-tool`
-- `overlay-two-images-online-for-comparison`
-- `crop-multiple-images-same-frame`
+- `aspect-ratio-vs-resolution`
+- `match-face-position-across-photos`
+- `prepare-before-after-video`
+- `crop-photos-without-uploading`
+- `image-crop-quality-troubleshooting`
+- `consistent-product-photo-cropping`
+- `crop-portrait-photos-without-cutting-subject`
+- `crop-images-for-social-media`
+- `crop-mixed-orientation-photos-for-carousel`
+- `crop-transparent-png-images`
+- `crop-large-images-on-mobile`
+- `create-consistent-progress-photos`
 
-The three older overlapping guides were removed from the generated guide list to reduce keyword cannibalization:
+Each guide solves a separate user problem and includes localized metadata, canonical and hreflang links, Article and FAQ structured data, instructional sections, limitations, related internal links, and a sitemap/feed entry.
 
-- `crop-multiple-images-same-size`
-- `align-before-after-photos`
-- `overlay-two-images-online`
+## Content-length validation
 
-## Deployment
+Every localized article body exceeds 800 characters. The automated minimums in this build are:
 
-Replace the files in the current GitHub project with this build, then run:
+- English: 2,173
+- Korean: 824
+- Japanese: 802
+- Spanish: 901
 
-```bash
-git add .
-git commit -m "Add multilingual priority keyword guides"
-git push
-```
+The count includes the visible introduction, body instructions, notes/checklists, and FAQs. It excludes page-navigation text and unrelated footer content.
 
-Render will rebuild the static site automatically when the repository is connected.
-After deployment, resubmit `https://overlaycrop.com/sitemap.xml` in Google Search Console if needed.
+## Consolidated legacy URLs
+
+Several earlier pages had substantially overlapping search intent. They are no longer generated as separate articles. Permanent redirects in `render.yaml` send them to the most relevant current guide.
+
+Do not recreate thin variants simply to target another keyword. Expand an existing guide when the underlying task is the same, and add a new guide only when it solves a clearly different problem.

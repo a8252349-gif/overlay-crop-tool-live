@@ -26,3 +26,62 @@
 .relativeSlider:focus-visible{border-radius:8px;box-shadow:0 0 0 3px rgb(255 90 54 / 22%)}
 .relativeSlider:active .relativeSliderThumb{width:18px;height:18px}
 @media(max-width:760px){.relativeSlider{height:44px}.relativeSliderThumb{width:20px;height:20px}.relativeSlider:active .relativeSliderThumb{width:22px;height:22px}}
+
+/* Content-quality update */
+.guideHeader{margin-bottom:28px}.articleMeta,.cardMeta{display:flex;flex-wrap:wrap;gap:10px 18px;color:#6a6a6a;font-size:.88rem}.articleMeta span+span::before,.cardMeta span+span::before{content:"·";margin-right:18px}.guideIllustration{margin:36px 0 42px;border:1px solid #ddd;border-radius:24px;overflow:hidden;background:#f3f1ea}.guideIllustration img{display:block;width:100%;height:auto}.takeawayBox,.guideToc,.limitations,.testedBlock,.resourceExplanation{border:1px solid #ddd;border-radius:20px;padding:28px;background:#fafaf8;margin:36px 0}.takeawayBox h2,.guideToc h2{font-size:1.25rem;margin-top:0}.takeawayBox li,.guideToc li{margin:8px 0;line-height:1.6}.guideToc a{color:inherit;text-underline-offset:3px}.guideNote{border-left:5px solid var(--accent);padding:14px 18px;background:#fff4ef;border-radius:0 12px 12px 0}.tableScroll{overflow:auto;margin:24px 0;border:1px solid #ddd;border-radius:14px}.tableScroll table{border-collapse:collapse;width:100%;min-width:560px;background:#fff}.tableScroll th,.tableScroll td{padding:14px 16px;border-bottom:1px solid #e5e5e5;text-align:left;vertical-align:top;line-height:1.45}.tableScroll thead th{background:#f3f3ef;font-size:.9rem}.tableScroll tbody th{font-weight:700}.guideCount{font-size:.9rem!important;font-weight:700;color:#222!important}.cardMeta{margin-bottom:16px}.detailedSteps{display:grid;gap:22px}.detailedSteps section{padding:30px;border:1px solid #ddd;border-radius:20px;background:#fff}.detailedSteps h2{margin:0 0 12px}.detailedSteps p,.detailedSteps li,.limitations li,.testedBlock p,.resourceExplanation p{line-height:1.75;color:#444}.toolGrid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.planningTool{border:1px solid #ddd;border-radius:22px;padding:28px;background:#fff}.planningTool>p{color:#666;line-height:1.65}.inputGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}.inputGrid label,.inputGrid output{display:flex;flex-direction:column;gap:7px;font-size:.86rem;color:#555}.inputGrid input{height:44px;border:1px solid #ccc;border-radius:10px;padding:0 12px;font:inherit}.inputGrid output{border:1px solid #ddd;border-radius:10px;padding:10px 12px;background:#f7f7f4}.inputGrid output strong{color:#111;font-size:1.1rem}.qualityResult{margin-top:18px;padding:18px;border-radius:14px;background:#111;color:#fff}.qualityResult span{font-size:.8rem;color:#bbb}.qualityResult strong{display:block;margin-top:6px}.qualityResult p{margin-bottom:0;color:#eee}.resourceExplanation{max-width:820px}.resourceExplanation a{display:inline-block;margin:10px 18px 0 0}.resourceExplanation .primaryCta{color:#fff}.legalPage .lead{margin-bottom:40px}
+@media(max-width:760px){.toolGrid{grid-template-columns:1fr}.inputGrid{grid-template-columns:1fr}.guideIllustration{border-radius:16px}.takeawayBox,.guideToc,.limitations,.testedBlock,.resourceExplanation,.planningTool{padding:22px}.tableScroll{margin-left:-4px;margin-right:-4px}.articleMeta,.cardMeta{gap:8px 12px}.articleMeta span+span::before,.cardMeta span+span::before{margin-right:12px}}
+
+.knowledgeSection,
+.workflowSection {
+  width: min(1180px, calc(100% - 32px));
+  margin: 56px auto;
+}
+.knowledgeSection {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.knowledgeSection article,
+.workflowGrid article {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 28px;
+  background: var(--panel);
+}
+.knowledgeSection h2,
+.workflowSection h2 { margin: 8px 0 14px; }
+.knowledgeSection p,
+.workflowSection > p,
+.workflowGrid p { line-height: 1.75; color: var(--muted); }
+.workflowGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+.workflowGrid h3 { margin: 0 0 10px; }
+@media (max-width: 760px) {
+  .knowledgeSection,
+  .workflowGrid { grid-template-columns: 1fr; }
+}
+
+.editorHelpSection {
+  width: min(1180px, calc(100% - 32px));
+  margin: 48px auto;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+}
+.editorHelpSection article {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 28px;
+  background: var(--panel);
+}
+.editorHelpSection h2 { margin-top: 0; }
+.editorHelpSection p,
+.editorHelpSection li { color: var(--muted); line-height: 1.75; }
+.editorHelpSection ul { padding-left: 20px; margin-bottom: 0; }
+@media (max-width: 760px) {
+  .editorHelpSection { grid-template-columns: 1fr; }
+}

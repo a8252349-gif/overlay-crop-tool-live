@@ -5,3 +5,26 @@ services:
     buildCommand: npm install && npm run build
     staticPublishPath: ./out
     pullRequestPreviewsEnabled: true
+    routes:
+      - type: redirect
+        source: /:locale/guides/crop-multiple-images-same-size/
+        destination: /:locale/guides/crop-multiple-images-to-the-same-size/
+      - type: redirect
+        source: /:locale/guides/crop-multiple-images-same-frame/
+        destination: /:locale/guides/crop-multiple-images-to-the-same-size/
+      - type: redirect
+        source: /:locale/guides/align-before-after-photos/
+        destination: /:locale/guides/align-before-and-after-photos/
+      - type: redirect
+        source: /:locale/guides/before-and-after-photo-alignment-tool/
+        destination: /:locale/guides/align-before-and-after-photos/
+      - type: redirect
+        source: /:locale/guides/overlay-two-images-online/
+        destination: /:locale/guides/align-before-and-after-photos/
+      - type: redirect
+        source: /:locale/guides/overlay-two-images-online-for-comparison/
+        destination: /:locale/guides/align-before-and-after-photos/
+      - type: redirect
+        source: /:locale/guides/best-instagram-image-sizes/
+        destination: /:locale/guides/aspect-ratio-vs-resolution/
+

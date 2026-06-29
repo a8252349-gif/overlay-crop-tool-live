@@ -4,7 +4,7 @@ export const SITE_NAME = "Overlay Crop";
 export const SITE_DESCRIPTION =
   "Overlay, align, and crop up to five images to the same frame, aspect ratio, and output dimensions.";
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://overlaycrop.com").replace(/\/$/, "");
-export const CONTENT_UPDATED_AT = new Date("2026-06-19T00:00:00.000Z");
+export const CONTENT_UPDATED_AT = new Date("2026-06-29T00:00:00.000Z");
 
 export const localeLanguageTags: Record<Locale, string> = {
   en: "en-US",

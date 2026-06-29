@@ -4,8 +4,8 @@ import { escapeXml, SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-static";
 
-const LAST_MODIFIED = "2026-06-19";
-const fixedPages = ["", "editor", "how-it-works", "guides", "faq", "about", "contact", "privacy", "terms", "cookies"] as const;
+const LAST_MODIFIED = "2026-06-29";
+const fixedPages = ["", "editor", "how-it-works", "guides", "faq", "about", "contact", "privacy", "terms", "cookies", "resources"] as const;
 
 function localizedUrl(locale: string, path: string) {
   const suffix = path ? `${path.replace(/^\/+|\/+$/g, "")}/` : "";

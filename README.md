@@ -11,7 +11,7 @@ A deployable multilingual Next.js web app for overlaying up to five images, alig
 - English, Korean, Japanese and Spanish routes
 - Browser language landing page
 - SEO metadata, canonical links, hreflang, robots and sitemap
-- Eight search guides in all four languages (32 localized guide pages)
+- Fifteen in-depth guides in all four languages (60 localized guide pages)
 - How it works, FAQ, About, Contact, Privacy, Terms and Cookie Policy
 - Article structured data and internal links to the editor
 - AdSense script/slot structure and ad placeholders before account setup
@@ -124,4 +124,6 @@ The Google verification value is only needed when using the HTML meta-tag verifi
 
 ## Multilingual priority keyword guides
 
-This version includes five additional search-focused guides in English, Korean, Japanese, and Spanish. They are generated from `lib/priority-guides.ts`, displayed first on the home page and guide index, linked to one another, and included automatically in the XML/text sitemaps and RSS/Atom feeds. See `KEYWORD_GUIDES.md` for the exact URLs.
+This revision contains fifteen distinct in-depth guides per locale, original guide illustrations, a localized resources page with two interactive planning tools, expanded core pages, and permanent redirects for overlapping legacy guide URLs. See `CONTENT_QUALITY_AUDIT.md` for the complete revision and deployment checklist.
+
+- Includes 15 distinct multilingual guides, six original new topic illustrations, and automated 800-character minimum validation for every localized article body
