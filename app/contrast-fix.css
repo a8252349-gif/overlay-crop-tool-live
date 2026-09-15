@@ -9,3 +9,25 @@ input, textarea, select { background:#ffffff; }
 .articleCta { background:#111111; color:#ffffff; }
 .articleCta p { color:#dddddd; }
 .siteFooter { color:#161616; }
+
+/* Homepage visual polish */
+.hero .primaryCta::before,
+.featureGrid article::before,
+.workflowGrid article h3::before,
+.knowledgeSection article h2::before {
+  display:inline-grid;
+  place-items:center;
+  width:1.85rem;
+  height:1.85rem;
+  margin-right:.55rem;
+  border-radius:.55rem;
+  line-height:1;
+  font-size:.8rem;
+  font-weight:900;
+  vertical-align:-.16rem;
+}
+.hero .primaryCta::before { content:"✦"; background:rgba(255,255,255,.2); color:#fff; }
+.featureGrid article { position:relative; padding-top:4.2rem; }
+.featureGrid article::before { content:"◇"; position:absolute; top:1.15rem; left:1.4rem; background:#fff0eb; color:#c33e20; }
+.workflowGrid article h3::before { content:"✓"; background:#e9f7ef; color:#176b46; }
+.knowledgeSection article h2::before { content:"◎"; background:#fff0eb; color:#c33e20; }
