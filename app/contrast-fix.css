@@ -1,0 +1,11 @@
+:root { color-scheme: light !important; }
+html, body { background:#f4f4f1; color:#161616; }
+button, input, textarea, select, option { color:#161616; }
+input, textarea, select { background:#ffffff; }
+.siteHeader, .cookieBanner, .editorTopbar, .layerPanel, .controlPanel, .articleCard, .stepGrid article, .dropPrompt, .legalPage, .faqList details { color:#161616; }
+.siteHeader select, .editorTopbar select, .editorTopbar input, .zoomNumber input { background:#ffffff; color:#161616; }
+.button, .layerActions button, .controlButtons button, .nudgeGrid button { color:#161616; }
+.button.primary, .primaryCta, .button.dark, .layerActions .on, .cookieBanner button { color:#ffffff; }
+.articleCta { background:#111111; color:#ffffff; }
+.articleCta p { color:#dddddd; }
+.siteFooter { color:#161616; }
